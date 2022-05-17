@@ -74,4 +74,29 @@ const createUrl = async function (req, res) {
     
 }
 
+const getlongURl = async function (req, res) {
+    try{
+        const urlCode = req.params.urlCode;
+
+        if (Object.keys(urlCode).length == 0) { return res.status(400).send({ status: false, message: 'Please provide URL Code in Params' }) }
+        console.log(Object.keys(urlCode))
+
+        const URL = await urlMOdel.findOne({ urlCode: urlCode }).select({longUrl:1})
+
+        if (!URL) { return res.status(404).send({ status: false, message: 'No URL found with this URL Code. Please check input and try again' }) }
+
+    
+       
+
+      return res.status(302).send({data: URL});
+
+      
+
+    }
+    catch(err){
+        return res.status(500).send({ message: err.message })
+    }
+}
+
 module.exports.createUrl = createUrl
+module.exports.getlongURl = getlongURl
