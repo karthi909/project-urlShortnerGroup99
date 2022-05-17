@@ -46,26 +46,25 @@ const createUrl = async function (req, res) {
 
         const shorturl = baseUrl + '/' + urlCode
 
-       // console.log(shorturl)
+       //console.log(shorturl)
 
-       data.shorturl = shorturl
-        console.log(data.shorturl)
+       data.shortUrl = shorturl
+        //console.log(data.shorturl)
 
-        data.urlCode = urlCode
-        console.log(data.urlCode)
+       data.urlcode = urlCode
+       // console.log(data.urlCode)
 
-        let repeat = await urlMOdel.findOne({shorturl: data.shorturl, urlcode:data.urlCode})
+        let repeat = await urlMOdel.findOne({shorturl: data.shorturl, urlcode:data.urlCode}) 
         console.log(repeat)
         if(repeat) return res.status(400).send({status: false, msg:"not a unique shorturl and urlcode"})
 
 
-        await urlMOdel.create(data);
-        //console.log(newurl)
+        
+
+        await urlMOdel.create({longUrl: longUrl, shortUrl: shorturl, urlcode: urlCode});
+        
 
         return res.status(201).send({status: true, msg:"URL created successfully", data: data})
-
-
-
 
     }
     catch(err){
