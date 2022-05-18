@@ -58,24 +58,29 @@ const createUrl = async (req, res) => {
     
                     const nanoid = customAlphabet('abcdefghij', 10)
                     let codeurl = nanoid()
+                    //console.log(codeurl)
                     let urlCode = codeurl.toLowerCase()
+                   // console.log(urlCode)
                     
                     let shortUrl = baseUrl + "/" + urlCode;
 
                     data.urlCode = urlCode
+
                     data.shortUrl = shortUrl
 
-                    await urlMOdel.create(data)
+                    await urlMOdel.create({longUrl: data.longUrl, shortUrl: data.shortUrl, urlCode: data.urlCode})
                     let responseData  = await urlMOdel.findOne({urlCode:urlCode}).select({_id:0, __v:0});
                     await SET_ASYNC(`${data.longUrl}`, JSON.stringify(responseData))
                     return res.status(201).send({status: true, message: "URL create successfully",data:responseData});
 
                 }
         }else{
+            
            return res.status(400).send({status: false, message: "Invalid longUrl"});
         }    
 
     }catch(err){
+        console.log(err)
         return res.status(500).send({status: false, Error: err.message})
     }
 }
