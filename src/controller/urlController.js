@@ -27,11 +27,11 @@ const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
   
 
-const isValid = function (value) {
-    if (typeof value === "undefined" || value === null) return false;
-    if (typeof value === "string" && value.trim().length === 0) return false;
-    return true;
-};
+// const isValid = function (value) {
+//     if (typeof value === "undefined" || value === null) return false;
+//     if (typeof value === "string" && value.trim().length === 0) return false;
+//     return true;
+// };
 
 
 
@@ -56,11 +56,11 @@ const createUrl = async (req, res) => {
                     return res.status(200).send({status: true, message: "Success",data: url});
                 }else{
     
-                    const nanoid = customAlphabet('abcdefghij', 10)
-                    let codeurl = nanoid()
+                    const nanoid = customAlphabet('abcdefghijAB', 12)
+                    let urlCode = nanoid()
                     //console.log(codeurl)
-                    let urlCode = codeurl.toLowerCase()
-                   // console.log(urlCode)
+                    //let urlCode = codeurl.toLowerCase()
+                    console.log(urlCode)
                     
                     let shortUrl = baseUrl + "/" + urlCode;
 
@@ -68,8 +68,12 @@ const createUrl = async (req, res) => {
 
                     data.shortUrl = shortUrl
 
-                    await urlMOdel.create({longUrl: data.longUrl, shortUrl: data.shortUrl, urlCode: data.urlCode})
-                    let responseData  = await urlMOdel.findOne({urlCode:urlCode}).select({_id:0, __v:0});
+                    let repeat = await urlMOdel.find({urlCode: data.urlCode})
+                    console.log(repeat)
+                    if(!repeat) return res.status(400).send({status: false, msg:"repeated url code" })
+
+                    await urlMOdel.create(data)
+                    let responseData  = await urlMOdel.findOne({urlCode:urlCode}).select({_id:0, __v:0, createdAt:0, updatedAt: 0});
                     await SET_ASYNC(`${data.longUrl}`, JSON.stringify(responseData))
                     return res.status(201).send({status: true, message: "URL create successfully",data:responseData});
 
