@@ -23,8 +23,9 @@ const redisClient = redis.createClient(
   });
 
   
-const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
+const SET_ASYNC = promisify(redisClient.SETEX).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
+
   
 
 // const isValid = function (value) {
@@ -60,7 +61,7 @@ const createUrl = async (req, res) => {
                     let urlCode = nanoid()
                     //console.log(codeurl)
                     //let urlCode = codeurl.toLowerCase()
-                    console.log(urlCode)
+                   // console.log(urlCode)
                     
                     let shortUrl = baseUrl + "/" + urlCode;
 
@@ -69,12 +70,12 @@ const createUrl = async (req, res) => {
                     data.shortUrl = shortUrl
 
                     let repeat = await urlMOdel.find({urlCode: data.urlCode})
-                    console.log(repeat)
+                   // console.log(repeat)
                     if(!repeat) return res.status(400).send({status: false, msg:"repeated url code" })
 
                     await urlMOdel.create(data)
                     let responseData  = await urlMOdel.findOne({urlCode:urlCode}).select({_id:0, __v:0, createdAt:0, updatedAt: 0});
-                    await SET_ASYNC(`${data.longUrl}`, JSON.stringify(responseData))
+                    await SET_ASYNC(`${data.longUrl}`,60, JSON.stringify(responseData))
                     return res.status(201).send({status: true, message: "URL create successfully",data:responseData});
 
                 }
@@ -102,7 +103,7 @@ const getUrl = async (req, res) => {
         let code = await urlMOdel.findOne({urlCode: req.params.urlCode}) 
         if(!code) return res.status(404).send({status: false, message:"No URL Found"})
 
-        await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(code))
+        await SET_ASYNC(`${req.params.urlCode}`,60, JSON.stringify(code))
         return res.status(307).redirect(code.longUrl);
     }
   }catch(err){
