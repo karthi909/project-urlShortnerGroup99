@@ -98,13 +98,13 @@ const getUrl = async (req, res) => {
     //console.log(cacheData)
     let url = JSON.parse(cacheData)
     if(url){
-         return res.status(307).redirect(url.longUrl)
+         return res.status(302).redirect(url.longUrl)
     }else{
         let code = await urlMOdel.findOne({urlCode: req.params.urlCode}) 
         if(!code) return res.status(404).send({status: false, message:"No URL Found"})
 
         await SET_ASYNC(`${req.params.urlCode}`,60, JSON.stringify(code))
-        return res.status(307).redirect(code.longUrl);
+        return res.status(302).redirect(code.longUrl);
     }
   }catch(err){
          return res.status(500).send({status: false, Error: err.message})
