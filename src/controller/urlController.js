@@ -41,6 +41,7 @@ const createUrl = async (req, res) => {
     try{
 
         const data = req.body;
+        if(Object.keys(data).length == 0) return res.status(400).send({status: false, msg:"data is Missing"})
         const baseUrl = 'http:localhost:3000'
 
         if(!data.longUrl) return res.status(400).send({status: false, message: "longUrl is required"})
