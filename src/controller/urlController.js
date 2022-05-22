@@ -49,14 +49,23 @@ const createUrl = async (req, res) => {
         if(!validUrl.isUri(baseUrl)){
             return res.status(401).send({status: false, message: "Invalid baseUrl"});
         }
-    
+       
+    //validUrl.isUri(data.longUrl)
         if(validUrl.isUri(data.longUrl)){
     
                 let getUrl = await GET_ASYNC(`${data.longUrl}`)
                 let url = JSON.parse(getUrl)
                 if(url){
                     return res.status(200).send({status: true, message: "Success",data: url});
-                }else{
+                } 
+
+                let reptLongUrl = await urlMOdel.findOne({longUrl: data.longUrl}).select({_id:0, __v:0, createdAt:0, updatedAt: 0});
+                
+                
+                if(reptLongUrl) {
+                    await SET_ASYNC(`${data.longUrl}`,60, JSON.stringify(reptLongUrl))
+                    return res.status(201).send({status: true, msg:"URL created Successfully", data: reptLongUrl})
+                } else {
     
                     const nanoid = customAlphabet('abcdefghijAB', 12)
                     let urlCode = nanoid()
@@ -98,6 +107,7 @@ const getUrl = async (req, res) => {
     let cacheData = await GET_ASYNC(`${req.params.urlCode}`)
     //console.log(cacheData)
     let url = JSON.parse(cacheData)
+    //console.log(url)
     if(url){
          return res.status(302).redirect(url.longUrl)
     }else{
